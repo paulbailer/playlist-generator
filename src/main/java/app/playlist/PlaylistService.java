@@ -1,4 +1,4 @@
-package htwberlin.web.tech;
+package app.playlist;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,13 +17,12 @@ public class PlaylistService {
     }
 
     public Playlist get(Long id) {
-        return repo.findById(id).orElseThrow(() -> new RuntimeException());
+        return repo.findById(id).orElseThrow(RuntimeException::new);
     }
 
     public List<Playlist> getAll() {
-        Iterable<Playlist> iterator = repo.findAll();
-        List<Playlist> playlists = new ArrayList<Playlist>();
-        for (Playlist playlist : iterator)  playlists.add(playlist);
+        List<Playlist> playlists = new ArrayList<>();
+        repo.findAll().forEach(playlists::add);
         return playlists;
     }
 }
