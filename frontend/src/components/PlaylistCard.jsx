@@ -1,7 +1,7 @@
 export default function PlaylistCard({ playlist, highlight }) {
   return (
     <div className={`playlist-card${highlight ? ' highlight' : ''}`}>
-      <span className="playlist-name">{playlist.name}</span>
+      <span className="playlist-name">{playlist.name || '—'}</span>
       <a
         href={playlist.link}
         target="_blank"

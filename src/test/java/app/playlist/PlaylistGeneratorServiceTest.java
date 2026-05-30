@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,64 +24,98 @@ class PlaylistGeneratorServiceTest {
     PlaylistGeneratorService service;
 
     @Test
-    void generate_savesPlaylistWithCorrectNameAndLink() {
-        var suggestions = List.of(new TrackSuggestion("Everlong", "Foo Fighters"));
-        when(claudeClient.getSuggestions("rock", 1)).thenReturn(suggestions);
-        when(spotifyClient.searchTrackUri(suggestions.get(0), "Bearer tok"))
-            .thenReturn(Optional.of("spotify:track:abc123"));
+    void generate_savesPlaylistWithTitleFromClaude() {
+        var tracks = List.of(new TrackSuggestion("Everlong", "Foo Fighters"));
+        when(claudeClient.getSuggestions(eq("rock"), anyInt(), any())).thenReturn(new PlaylistSuggestion("Rainy Day Drive", tracks));
+        when(spotifyClient.searchTrackUri(tracks.get(0), "Bearer tok")).thenReturn(Optional.of("spotify:track:abc123"));
         when(spotifyClient.getUserId("Bearer tok")).thenReturn("user1");
-        when(spotifyClient.createPlaylist("user1", "rock", "Bearer tok")).thenReturn("pl1");
+        when(spotifyClient.createPlaylist("user1", "Rainy Day Drive", "Bearer tok")).thenReturn("pl1");
         when(playlistService.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        Playlist result = service.generate("rock", 1, "Bearer tok");
+        Playlist result = service.generate(request("rock", 1), "Bearer tok");
 
-        assertThat(result.getName()).isEqualTo("rock");
+        assertThat(result.getName()).isEqualTo("Rainy Day Drive");
         assertThat(result.getLink()).isEqualTo("https://open.spotify.com/playlist/pl1");
     }
 
     @Test
     void generate_addsOnlyTracksFoundOnSpotify() {
-        var suggestions = List.of(
+        var tracks = List.of(
             new TrackSuggestion("Real Song", "Real Artist"),
             new TrackSuggestion("Fake Song", "Fake Artist")
         );
-        when(claudeClient.getSuggestions("mix", 2)).thenReturn(suggestions);
-        when(spotifyClient.searchTrackUri(suggestions.get(0), "Bearer tok"))
-            .thenReturn(Optional.of("spotify:track:real"));
-        when(spotifyClient.searchTrackUri(suggestions.get(1), "Bearer tok"))
-            .thenReturn(Optional.empty());
-        when(spotifyClient.getUserId("Bearer tok")).thenReturn("u");
-        when(spotifyClient.createPlaylist("u", "mix", "Bearer tok")).thenReturn("pl");
+        when(claudeClient.getSuggestions(any(), anyInt(), any())).thenReturn(new PlaylistSuggestion("Mixed Bag", tracks));
+        when(spotifyClient.searchTrackUri(tracks.get(0), "Bearer tok")).thenReturn(Optional.of("spotify:track:real"));
+        when(spotifyClient.searchTrackUri(tracks.get(1), "Bearer tok")).thenReturn(Optional.empty());
+        when(spotifyClient.getUserId(any())).thenReturn("u");
+        when(spotifyClient.createPlaylist(any(), any(), any())).thenReturn("pl");
         when(playlistService.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        service.generate("mix", 2, "Bearer tok");
+        service.generate(request("mix", 2), "Bearer tok");
 
         verify(spotifyClient).addTracks("pl", List.of("spotify:track:real"), "Bearer tok");
     }
 
     @Test
+    void generate_capsTracksPerArtistAtTwo() {
+        var tracks = List.of(
+            new TrackSuggestion("Song A", "Same Artist"),
+            new TrackSuggestion("Song B", "Same Artist"),
+            new TrackSuggestion("Song C", "Same Artist")
+        );
+        when(claudeClient.getSuggestions(any(), anyInt(), any())).thenReturn(new PlaylistSuggestion("Artist Cap Test", tracks));
+        when(spotifyClient.searchTrackUri(any(), any())).thenReturn(Optional.of("spotify:track:x"));
+        when(spotifyClient.getUserId(any())).thenReturn("u");
+        when(spotifyClient.createPlaylist(any(), any(), any())).thenReturn("pl");
+        when(playlistService.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        service.generate(request("test", 3), "Bearer tok");
+
+        verify(spotifyClient).addTracks(eq("pl"), argThat(list -> list.size() == 2), eq("Bearer tok"));
+    }
+
+    @Test
     void generate_skipsAddTracks_whenNoUrisResolved() {
-        var suggestions = List.of(new TrackSuggestion("Unknown", "Nobody"));
-        when(claudeClient.getSuggestions("obscure", 1)).thenReturn(suggestions);
+        var tracks = List.of(new TrackSuggestion("Unknown", "Nobody"));
+        when(claudeClient.getSuggestions(any(), anyInt(), any())).thenReturn(new PlaylistSuggestion("Hidden Gems", tracks));
         when(spotifyClient.searchTrackUri(any(), any())).thenReturn(Optional.empty());
         when(spotifyClient.getUserId(any())).thenReturn("u");
         when(spotifyClient.createPlaylist(any(), any(), any())).thenReturn("pl");
         when(playlistService.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        service.generate("obscure", 1, "Bearer tok");
+        service.generate(request("obscure", 1), "Bearer tok");
 
         verify(spotifyClient, never()).addTracks(any(), any(), any());
     }
 
     @Test
     void generate_persistsPlaylistToDatabase() {
-        when(claudeClient.getSuggestions(any(), anyInt())).thenReturn(List.of());
+        when(claudeClient.getSuggestions(any(), anyInt(), any())).thenReturn(new PlaylistSuggestion("Chill Vibes", List.of()));
         when(spotifyClient.getUserId(any())).thenReturn("u");
         when(spotifyClient.createPlaylist(any(), any(), any())).thenReturn("pl");
         when(playlistService.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        service.generate("chill", 10, "Bearer tok");
+        service.generate(request("chill", 10), "Bearer tok");
 
         verify(playlistService).save(any(Playlist.class));
+    }
+
+    @Test
+    void generate_includesCriteriaInClaudeCall() {
+        when(claudeClient.getSuggestions(any(), anyInt(), any())).thenReturn(new PlaylistSuggestion("Title", List.of()));
+        when(spotifyClient.getUserId(any())).thenReturn("u");
+        when(spotifyClient.createPlaylist(any(), any(), any())).thenReturn("pl");
+        when(playlistService.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        var req = new GeneratePlaylistRequest("test", 5, "underground", "very_energetic", List.of("90s"), List.of("Angry"));
+        service.generate(req, "Bearer tok");
+
+        verify(claudeClient).getSuggestions(eq("test"), anyInt(), argThat(criteria ->
+            criteria.contains("underground") && criteria.contains("90s") && criteria.contains("Angry")
+        ));
+    }
+
+    private GeneratePlaylistRequest request(String prompt, int size) {
+        return new GeneratePlaylistRequest(prompt, size, null, null, null, null);
     }
 }

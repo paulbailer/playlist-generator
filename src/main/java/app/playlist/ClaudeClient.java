@@ -27,19 +27,22 @@ public class ClaudeClient {
         this.restClient = builder.build();
     }
 
-    public List<TrackSuggestion> getSuggestions(String prompt, int size) {
+    public PlaylistSuggestion getSuggestions(String prompt, int size, String criteria) {
+        String criteriaSection = criteria.isBlank() ? "" : "Additional criteria:\n" + criteria + "\n\n";
         String userMessage = String.format(
-            "Generate a playlist of exactly %d songs matching this description: \"%s\". " +
-            "Return ONLY a JSON array, no other text. " +
-            "Each element must have 'track' and 'artist' string fields. " +
-            "Choose well-known songs that are very likely to be on Spotify. " +
-            "Example format: [{\"track\": \"Bohemian Rhapsody\", \"artist\": \"Queen\"}]",
-            size, prompt
+            "Generate a playlist of %d songs matching this description: \"%s\".\n\n" +
+            "%s" +
+            "Return ONLY a raw JSON object — no markdown, no code fences, no explanation:\n" +
+            "{\"title\":\"<2-word playlist title that reflects the prompt>\",\"tracks\":[{\"track\":\"<song>\",\"artist\":\"<artist>\"}]}\n\n" +
+            "Guidelines:\n" +
+            "- No more than 2 songs per artist\n" +
+            "- Pick tracks that genuinely fit the mood and description",
+            size, prompt, criteriaSection
         );
 
         Map<String, Object> body = Map.of(
             "model", model,
-            "max_tokens", 1024,
+            "max_tokens", 2048,
             "messages", List.of(Map.of("role", "user", "content", userMessage))
         );
 
@@ -58,8 +61,7 @@ public class ClaudeClient {
             if (text.startsWith("```")) {
                 text = text.replaceAll("(?s)^```[a-zA-Z]*\\n?", "").replaceAll("```\\s*$", "").strip();
             }
-            return objectMapper.readValue(text,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, TrackSuggestion.class));
+            return objectMapper.readValue(text, PlaylistSuggestion.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse Claude response: " + e.getMessage(), e);
         }

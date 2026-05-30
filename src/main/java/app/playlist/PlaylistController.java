@@ -26,7 +26,7 @@ public class PlaylistController {
     public ResponseEntity<Playlist> generatePlaylist(
             @RequestHeader("Authorization") String authHeader,
             @RequestBody GeneratePlaylistRequest request) {
-        return ResponseEntity.ok(generatorService.generate(request.prompt(), request.size(), authHeader));
+        return ResponseEntity.ok(generatorService.generate(request, authHeader));
     }
 
     @PostMapping("/playlists")

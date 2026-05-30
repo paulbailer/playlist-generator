@@ -163,5 +163,47 @@ input[type='number']:focus { border-color: var(--green); outline: none; }
 /* ── History ────────────────────────────────────────── */
 .section-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 12px; text-transform: uppercase; }
 
+/* ── Criteria ───────────────────────────────────────── */
+.criteria      { border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 16px; padding-top: 20px; }
+.criteria-row  { display: flex; flex-direction: column; gap: 8px; }
+.criteria-label { color: var(--text-muted); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+.criteria-hint  { color: var(--border); font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+/* ── Segmented selector ─────────────────────────────── */
+.segmented { border: 1px solid var(--border); border-radius: var(--radius); display: flex; overflow: hidden; }
+
+.segment {
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex: 1;
+  font-size: 0.8rem;
+  padding: 8px 4px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.segment:last-child  { border-right: none; }
+.segment:hover       { background: var(--surface); color: var(--text); }
+.segment.active      { background: var(--green); color: #000; font-weight: 600; }
+
+/* ── Chip selector ──────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.chip:hover  { border-color: var(--green); color: var(--text); }
+.chip.active { background: var(--green); border-color: var(--green); color: #000; font-weight: 600; }
+
 /* ── Error ──────────────────────────────────────────── */
 .error { color: #f15e6c; margin-bottom: 16px; }

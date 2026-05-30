@@ -63,12 +63,12 @@ class PlaylistControllerTest {
     @Test
     void generatePlaylist_returns200WithGeneratedPlaylist() throws Exception {
         Playlist generated = playlistWith("upbeat rock", "https://open.spotify.com/playlist/abc");
-        when(generatorService.generate(anyString(), anyInt(), anyString())).thenReturn(generated);
+        when(generatorService.generate(any(), anyString())).thenReturn(generated);
 
         mockMvc.perform(post("/generate-playlist")
                 .header("Authorization", "Bearer test-token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new GeneratePlaylistRequest("upbeat rock", 10))))
+                .content(objectMapper.writeValueAsString(new GeneratePlaylistRequest("upbeat rock", 10, null, null, null, null))))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("upbeat rock"))
             .andExpect(jsonPath("$.link").value("https://open.spotify.com/playlist/abc"));
@@ -76,13 +76,13 @@ class PlaylistControllerTest {
 
     @Test
     void generatePlaylist_passesAuthHeaderToService() throws Exception {
-        when(generatorService.generate(eq("lo-fi"), eq(5), eq("Bearer my-token")))
+        when(generatorService.generate(any(), eq("Bearer my-token")))
             .thenReturn(playlistWith("lo-fi", "https://open.spotify.com/playlist/xyz"));
 
         mockMvc.perform(post("/generate-playlist")
                 .header("Authorization", "Bearer my-token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new GeneratePlaylistRequest("lo-fi", 5))))
+                .content(objectMapper.writeValueAsString(new GeneratePlaylistRequest("lo-fi", 5, null, null, null, null))))
             .andExpect(status().isOk());
     }
 

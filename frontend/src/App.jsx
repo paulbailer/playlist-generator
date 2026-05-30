@@ -16,7 +16,7 @@ export default function App() {
     exchangeCodeForToken(code)
       .then(token => {
         setAccessToken(token);
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', import.meta.env.BASE_URL);
       })
       .catch(() => setLoading(false))
       .finally(() => setLoading(false));
