@@ -1,4 +1,4 @@
-# Spotify Playlist Generator
+# Spotify Playlist Generator [![Live](https://img.shields.io/badge/Live-brightgreen)](https://paulbailer.github.io/playlist-generator)
 
 ## Origin
 
