@@ -27,6 +27,20 @@ class PlaylistControllerTest {
     @MockitoBean SpotifyClient spotifyClient;
 
     @Test
+    void suggest_returns200WithTrackList() throws Exception {
+        var tracks = List.of(new TrackResult("Everlong", "Foo Fighters", "https://open.spotify.com/track/1"));
+        when(generatorService.suggest(any())).thenReturn(new SuggestionResponse("Rainy Drive", tracks));
+
+        mockMvc.perform(post("/suggest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    new GeneratePlaylistRequest("rock", 5, null, null, null, null))))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.title").value("Rainy Drive"))
+            .andExpect(jsonPath("$.tracks[0].track").value("Everlong"));
+    }
+
+    @Test
     void deleteUserData_returns204AndDeletesData() throws Exception {
         when(spotifyClient.getUserId("Bearer token")).thenReturn("user123");
 

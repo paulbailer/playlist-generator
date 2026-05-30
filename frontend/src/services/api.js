@@ -13,6 +13,16 @@ export async function generatePlaylist(prompt, size, accessToken, criteria = {})
   return response.json();
 }
 
+export async function suggestTracks(prompt, size, criteria = {}) {
+  const response = await fetch(`${BASE_URL}/suggest`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt, size, ...criteria }),
+  });
+  if (!response.ok) throw new Error('Suggestion failed');
+  return response.json();
+}
+
 export async function deleteUserData(accessToken) {
   const response = await fetch(`${BASE_URL}/user-data`, {
     method: 'DELETE',

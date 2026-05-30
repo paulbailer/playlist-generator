@@ -24,6 +24,21 @@ class PlaylistGeneratorServiceTest {
     PlaylistGeneratorService service;
 
     @Test
+    void suggest_returnsTrackListWithTitle() {
+        var suggestions = List.of(new TrackSuggestion("Everlong", "Foo Fighters"));
+        when(claudeClient.getSuggestions(any(), anyInt(), any()))
+            .thenReturn(new PlaylistSuggestion("Rainy Drive", suggestions));
+        when(spotifyClient.searchTrack(suggestions.get(0)))
+            .thenReturn(Optional.of(new TrackResult("Everlong", "Foo Fighters", "https://open.spotify.com/track/1")));
+
+        SuggestionResponse result = service.suggest(request("rock", 1));
+
+        assertThat(result.title()).isEqualTo("Rainy Drive");
+        assertThat(result.tracks()).hasSize(1);
+        assertThat(result.tracks().get(0).track()).isEqualTo("Everlong");
+    }
+
+    @Test
     void generate_savesPlaylistWithTitleFromClaude() {
         var tracks = List.of(new TrackSuggestion("Everlong", "Foo Fighters"));
         when(claudeClient.getSuggestions(eq("rock"), anyInt(), any())).thenReturn(new PlaylistSuggestion("Rainy Day Drive", tracks));

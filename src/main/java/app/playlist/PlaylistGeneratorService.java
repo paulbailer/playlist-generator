@@ -18,6 +18,21 @@ public class PlaylistGeneratorService {
         this.playlistService = playlistService;
     }
 
+    public SuggestionResponse suggest(GeneratePlaylistRequest request) {
+        String criteria = buildCriteria(request);
+        int fetchSize = (int) Math.ceil(request.size() * 1.5);
+        PlaylistSuggestion suggestion = claudeClient.getSuggestions(request.prompt(), fetchSize, criteria);
+
+        List<TrackResult> tracks = capByArtist(suggestion.tracks(), 2).stream()
+            .map(spotifyClient::searchTrack)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .limit(request.size())
+            .collect(Collectors.toList());
+
+        return new SuggestionResponse(safeTitle(suggestion.title(), request.prompt()), tracks);
+    }
+
     public Playlist generate(GeneratePlaylistRequest request, String authHeader) {
         String criteria = buildCriteria(request);
         int fetchSize = (int) Math.ceil(request.size() * 1.5);

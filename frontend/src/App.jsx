@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import Login from './components/Login';
 import Generator from './components/Generator';
 import Privacy from './components/Privacy';
-import { exchangeCodeForToken, getAccessToken, clearTokens } from './auth/spotify';
+import { exchangeCodeForToken, getAccessToken, clearTokens, redirectToSpotifyLogin } from './auth/spotify';
 
 export default function App() {
   const [accessToken, setAccessToken] = useState(getAccessToken());
@@ -26,7 +25,7 @@ export default function App() {
         setAccessToken(token);
         window.history.replaceState({}, '', import.meta.env.BASE_URL);
       })
-      .catch(() => setLoading(false))
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -37,6 +36,12 @@ export default function App() {
 
   if (showPrivacy) return <Privacy />;
   if (loading) return <div className="center">Connecting to Spotify…</div>;
-  if (!accessToken) return <Login />;
-  return <Generator accessToken={accessToken} onLogout={logout} />;
+
+  return (
+    <Generator
+      accessToken={accessToken}
+      onLogout={logout}
+      onConnect={redirectToSpotifyLogin}
+    />
+  );
 }

@@ -25,6 +25,11 @@ public class PlaylistController {
 
     Logger logger = LoggerFactory.getLogger(PlaylistController.class);
 
+    @PostMapping("/suggest")
+    public ResponseEntity<SuggestionResponse> suggest(@RequestBody GeneratePlaylistRequest request) {
+        return ResponseEntity.ok(generatorService.suggest(request));
+    }
+
     @PostMapping("/generate-playlist")
     public ResponseEntity<Playlist> generatePlaylist(
             @RequestHeader("Authorization") String authHeader,
