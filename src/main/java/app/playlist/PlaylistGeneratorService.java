@@ -63,7 +63,7 @@ public class PlaylistGeneratorService {
     }
 
     private int fetchSize(GeneratePlaylistRequest request) {
-        return request.size() * 2;
+        return request.size() * 3;
     }
 
     private String buildCriteria(GeneratePlaylistRequest r) {
