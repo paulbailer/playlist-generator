@@ -63,8 +63,7 @@ public class PlaylistGeneratorService {
     }
 
     private int fetchSize(GeneratePlaylistRequest request) {
-        int multiplier = "underground".equals(request.popularity()) ? 3 : 2;
-        return (int) Math.ceil(request.size() * multiplier);
+        return request.size() * 2;
     }
 
     private String buildCriteria(GeneratePlaylistRequest r) {
@@ -72,7 +71,7 @@ public class PlaylistGeneratorService {
 
         if (r.popularity() != null) {
             parts.add(switch (r.popularity()) {
-                case "underground" -> "Popularity: exclusively underground and obscure artists most people haven't heard of";
+                case "underground" -> "Popularity: underground and lesser-known artists that are digitally distributed and available on streaming platforms — not mainstream, but findable on Spotify";
                 case "deep_cuts"   -> "Popularity: deep cuts and B-sides, avoid mainstream hits";
                 case "popular"     -> "Popularity: well-known popular songs";
                 case "mainstream"  -> "Popularity: mainstream chart-topping hits";

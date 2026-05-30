@@ -35,6 +35,8 @@ public class ClaudeClient {
             "Return ONLY a raw JSON object — no markdown, no code fences, no explanation:\n" +
             "{\"title\":\"<2-word playlist title that reflects the prompt>\",\"tracks\":[{\"track\":\"<song>\",\"artist\":\"<artist>\"}]}\n\n" +
             "Guidelines:\n" +
+            "- Only suggest songs you are confident exist on Spotify. Do not invent titles.\n" +
+            "- If you are unsure whether a specific song is on Spotify, choose a different track by the same artist instead.\n" +
             "- No more than 2 songs per artist\n" +
             "- Pick tracks that genuinely fit the mood and description",
             size, prompt, criteriaSection
