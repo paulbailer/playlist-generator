@@ -35,7 +35,7 @@ This gives far more expressive input than the old numeric seed parameters (BPM f
 
 ## Features
 
-- **No login required** — anyone can generate a track list with links to Spotify, Apple Music, Tidal, and more via [song.link](https://song.link)
+- **No login required** — anyone can generate a track list with direct Spotify links
 - **Connect Spotify** to upgrade: playlists are created directly on your Spotify account
 - Natural language prompt — describe any vibe, mood, or theme
 - **Popularity** control — Underground → Deep cuts → Mixed → Popular → Mainstream
