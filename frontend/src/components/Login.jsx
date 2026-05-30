@@ -9,6 +9,7 @@ export default function Login() {
         <button className="btn-primary" onClick={redirectToSpotifyLogin}>
           Connect with Spotify
         </button>
+        <a href="#privacy" className="privacy-link">Privacy Policy</a>
       </div>
     </div>
   );

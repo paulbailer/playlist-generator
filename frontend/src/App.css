@@ -205,5 +205,21 @@ input[type='number']:focus { border-color: var(--green); outline: none; }
 .chip:hover  { border-color: var(--green); color: var(--text); }
 .chip.active { background: var(--green); border-color: var(--green); color: #000; font-weight: 600; }
 
+/* ── Footer / Privacy link ──────────────────────────── */
+footer         { margin-top: 48px; padding-bottom: 24px; text-align: center; }
+.privacy-link  { color: var(--text-muted); font-size: 0.8rem; text-decoration: none; }
+.privacy-link:hover { color: var(--text); }
+.login-card .privacy-link { display: block; margin-top: 20px; }
+
+/* ── Privacy page ───────────────────────────────────── */
+.privacy       { display: flex; flex-direction: column; gap: 28px; }
+.privacy h2    { font-size: 1.4rem; }
+.privacy h3    { color: var(--text); font-size: 1rem; margin-bottom: 8px; }
+.privacy p, .privacy li { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
+.privacy ul    { display: flex; flex-direction: column; gap: 8px; padding-left: 20px; }
+.privacy a     { color: var(--green); text-decoration: none; }
+.privacy a:hover { text-decoration: underline; }
+.privacy-date  { color: var(--border); font-size: 0.85rem; margin-top: -20px; }
+
 /* ── Error ──────────────────────────────────────────── */
 .error { color: #f15e6c; margin-bottom: 16px; }

@@ -150,6 +150,9 @@ export default function Generator({ accessToken, onLogout }) {
           </section>
         )}
       </main>
+      <footer>
+        <a href="#privacy" className="privacy-link">Privacy Policy</a>
+      </footer>
     </div>
   );
 }
