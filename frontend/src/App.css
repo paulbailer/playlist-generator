@@ -252,5 +252,31 @@ footer         { margin-top: 48px; padding-bottom: 24px; text-align: center; }
 
 .connect-prompt span { color: var(--text-muted); font-size: 0.875rem; }
 
+/* ── Auth error banner ──────────────────────────────── */
+.auth-error {
+  align-items: flex-start;
+  background: #2a1215;
+  border: 1px solid #f15e6c44;
+  border-radius: var(--radius);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+}
+
+.auth-error p    { color: #f15e6c; font-size: 0.875rem; line-height: 1.5; }
+.auth-error a    { color: #f15e6c; text-decoration: underline; }
+
+.auth-error-dismiss {
+  background: none;
+  border: none;
+  color: #f15e6c;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  padding: 0;
+}
+
 /* ── Error ──────────────────────────────────────────── */
 .error { color: #f15e6c; margin-bottom: 16px; }

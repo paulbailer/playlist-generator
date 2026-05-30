@@ -40,7 +40,7 @@ const MOOD_OPTIONS = [
   { value: 'Focused',     label: 'Focused' },
 ];
 
-export default function Generator({ accessToken, onLogout, onConnect }) {
+export default function Generator({ accessToken, onLogout, onConnect, authError, onDismissAuthError }) {
   const [prompt, setPrompt] = useState('');
   const [size, setSize] = useState(20);
   const [popularity, setPopularity] = useState('deep_cuts');
@@ -153,6 +153,18 @@ export default function Generator({ accessToken, onLogout, onConnect }) {
             </button>
           </div>
         </form>
+
+        {authError && (
+          <div className="auth-error">
+            <p>
+              Your Spotify account isn't authorised for this app yet.
+              To get full access, contact the developer at{' '}
+              <a href="mailto:page.bailer@gmx.de">page.bailer@gmx.de</a>.
+              You can still use the app without an account.
+            </p>
+            <button className="auth-error-dismiss" onClick={onDismissAuthError}>✕</button>
+          </div>
+        )}
 
         {error && <p className="error">{error}</p>}
 

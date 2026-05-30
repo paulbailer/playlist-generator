@@ -6,6 +6,7 @@ import { exchangeCodeForToken, getAccessToken, clearTokens, redirectToSpotifyLog
 export default function App() {
   const [accessToken, setAccessToken] = useState(getAccessToken());
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(() => window.location.hash === '#privacy');
 
   useEffect(() => {
@@ -16,7 +17,14 @@ export default function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
     const code = params.get('code');
+
+    if (error) {
+      setAuthError(true);
+      window.history.replaceState({}, '', import.meta.env.BASE_URL);
+      return;
+    }
     if (!code) return;
 
     setLoading(true);
@@ -42,6 +50,8 @@ export default function App() {
       accessToken={accessToken}
       onLogout={logout}
       onConnect={redirectToSpotifyLogin}
+      authError={authError}
+      onDismissAuthError={() => setAuthError(false)}
     />
   );
 }
