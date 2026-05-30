@@ -8,7 +8,7 @@ The backend was a Spring Boot REST API acting as a proxy to the Spotify Web API,
 
 ## Revival
 
-Three years later the project is being rebuilt from the ground up with a modern stack. The main driver was Spotify deprecating their `/v1/recommendations` endpoint in November 2024, which was the core of the original generation logic. Rather than find a workaround within the Spotify API, the approach is now:
+Three years later the project has been rebuilt with a modern stack. The main driver was Spotify deprecating their `/v1/recommendations` endpoint in November 2024, which was the core of the original generation logic. Rather than find a workaround within the Spotify API, the approach is now:
 
 1. **User describes** the playlist they want in plain language — any mood, theme, or context
 2. **Claude (Anthropic's LLM)** generates a list of specific track and artist suggestions that fit the description
@@ -17,82 +17,149 @@ Three years later the project is being rebuilt from the ground up with a modern 
 
 This gives far more expressive input than the old numeric seed parameters, and the quality of suggestions improves alongside the underlying model.
 
+## Live
+
+- **Frontend:** https://paulbailer.github.io/playlist-generator
+- **Backend:** Render (auto-deployed on push to `main`)
+
 ## Stack
 
 **Backend**
 - Java 17 / Spring Boot 3.5
-- PostgreSQL (production) / H2 (local dev)
-- Anthropic Claude API for playlist generation
-- Spotify Web API for search and playlist creation
-- Deployed on Render
+- PostgreSQL (production) / H2 in-memory (local dev)
+- Anthropic Claude API — playlist and title generation
+- Spotify Web API — track search, playlist creation
+- Deployed on Render via Docker
 
-**Frontend** *(in progress)*
-- React
-- Deployed on GitHub Pages
+**Frontend**
+- React 19 / Vite 6
+- Spotify OAuth 2.0 PKCE flow (no client secret in browser)
+- Deployed on GitHub Pages via GitHub Actions
+
+## Features
+
+- Natural language prompt — describe any vibe, mood, or theme
+- **Popularity** control — Underground → Deep cuts → Mixed → Popular → Mainstream
+- **Energy** control — Very chill → Chill → Medium → Energetic → Intense
+- **Era** filter — any combination of 60s through 2020s
+- **Mood** tags — Happy, Melancholic, Angry, Romantic, Nostalgic, Focused
+- Configurable track count (1–50)
+- Max 2 songs per artist enforced server-side
+- Playlist history scoped per Spotify user
 
 ## Project Structure
 
 ```
-src/
-  main/java/app/
-    Application.java          ← entry point
-    config/
-      WebConfig.java          ← CORS configuration
-    playlist/
-      Playlist.java           ← JPA entity
-      PlaylistRepository.java
-      PlaylistService.java    ← database operations
-      PlaylistController.java ← REST endpoints
-      PlaylistGeneratorService.java ← orchestrates generation flow
-      ClaudeClient.java       ← Claude API integration
-      SpotifyClient.java      ← Spotify API integration
-      GeneratePlaylistRequest.java
-      TrackSuggestion.java
-  test/java/app/
-    playlist/                 ← unit + slice tests
+frontend/                        ← React app (GitHub Pages)
+  src/
+    auth/spotify.js              ← PKCE OAuth helpers
+    services/api.js              ← backend API calls
+    components/
+      Login.jsx
+      Generator.jsx
+      PlaylistCard.jsx
+      SegmentedSelector.jsx
+      ChipSelector.jsx
+
+src/main/java/app/               ← Spring Boot backend (Render)
+  Application.java
+  config/
+    WebConfig.java               ← CORS
+  playlist/
+    Playlist.java                ← JPA entity
+    PlaylistRepository.java
+    PlaylistService.java
+    PlaylistController.java      ← REST endpoints
+    PlaylistGeneratorService.java
+    ClaudeClient.java            ← Claude API
+    SpotifyClient.java           ← Spotify API
+    GeneratePlaylistRequest.java
+    PlaylistSuggestion.java
+    TrackSuggestion.java
 ```
 
 ## Running Locally
 
-**Prerequisites:** Java 17, an Anthropic API key, a Spotify Developer App
+**Prerequisites:** Java 17, Node 18+, an Anthropic API key, a Spotify Developer App
 
-Set environment variables:
+**Backend**
+
 ```bash
-export SPRING_PROFILES_ACTIVE=local   # uses H2, no Postgres needed
+export SPRING_PROFILES_ACTIVE=local
 export ANTHROPIC_API_KEY=sk-ant-...
 export ANTHROPIC_MODEL=claude-sonnet-4-6   # optional, this is the default
-export SPOTIFY_CLIENT_ID=...
-export SPOTIFY_CLIENT_SECRET=...
-```
 
-```bash
 ./gradlew bootRun
 ```
 
-The H2 console is available at `http://localhost:8080/db-console` when running with the local profile.
+H2 console available at `http://localhost:8080/db-console`.
 
-## Key Endpoint
+**Frontend**
+
+Create `frontend/.env.local`:
+```
+VITE_SPOTIFY_CLIENT_ID=your_client_id
+VITE_REDIRECT_URI=http://127.0.0.1:3000/callback
+VITE_API_BASE_URL=http://localhost:8080
+```
+
+Add `http://127.0.0.1:3000/callback` as a redirect URI in your Spotify Developer App, then:
+
+```bash
+cd frontend && npm install && npm run dev
+```
+
+Open `http://127.0.0.1:3000` (not `localhost` — must match the redirect URI exactly).
+
+## API
 
 ```
 POST /generate-playlist
 Authorization: Bearer <spotify_access_token>
 Content-Type: application/json
 
-{ "prompt": "upbeat 90s rock for a road trip", "size": 20 }
+{
+  "prompt": "upbeat 90s rock for a road trip",
+  "size": 20,
+  "popularity": "deep_cuts",   // underground | deep_cuts | mixed | popular | mainstream
+  "energy": "energetic",       // very_chill | chill | medium | energetic | very_energetic
+  "era": ["90s", "2000s"],     // optional, any if omitted
+  "mood": ["Happy"]            // optional, any if omitted
+}
 ```
 
-Returns the saved playlist with a direct Spotify link.
+```
+GET /playlists
+Authorization: Bearer <spotify_access_token>
+```
 
-## Deployment (Render)
+## Deployment
+
+**Backend (Render)**
 
 The repo includes a `Dockerfile`. On Render:
 
-1. Create a **Web Service** pointing to this repo — Render detects the Dockerfile automatically
-2. Create a **PostgreSQL** instance and link it to the service
+1. New → Web Service → connect this repo, runtime: Docker
+2. New → PostgreSQL → use the internal connection details
 3. Set environment variables:
-   - `SPRING_DATASOURCE_URL` — Render's internal JDBC URL (`jdbc:postgresql://...`)
-   - `SPRING_DATASOURCE_USERNAME`
-   - `SPRING_DATASOURCE_PASSWORD`
-   - `ANTHROPIC_API_KEY`
-   - `SPOTIFY_CLIENT_ID`
-   - `SPOTIFY_CLIENT_SECRET`
+
+| Variable | Value |
+|---|---|
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://...` (internal URL from Render) |
+| `SPRING_DATASOURCE_USERNAME` | from Render PostgreSQL |
+| `SPRING_DATASOURCE_PASSWORD` | from Render PostgreSQL |
+| `ANTHROPIC_API_KEY` | your Anthropic key |
+| `ANTHROPIC_MODEL` | `claude-sonnet-4-6` |
+
+**Frontend (GitHub Pages)**
+
+Add these repository secrets (Settings → Secrets → Actions):
+
+| Secret | Value |
+|---|---|
+| `VITE_SPOTIFY_CLIENT_ID` | your Spotify client ID |
+| `VITE_API_BASE_URL` | your Render backend URL |
+
+The workflow in `.github/workflows/deploy.yml` builds and deploys automatically on every push to `main` that touches `frontend/`. It can also be triggered manually from the Actions tab.
+
+Add `https://paulbailer.github.io/playlist-generator` as a redirect URI in your Spotify Developer App.
