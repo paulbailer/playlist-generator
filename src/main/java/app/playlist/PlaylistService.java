@@ -29,4 +29,9 @@ public class PlaylistService {
     public List<Playlist> getByUser(String spotifyUserId) {
         return repo.findBySpotifyUserId(spotifyUserId);
     }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void deleteByUser(String spotifyUserId) {
+        repo.deleteBySpotifyUserId(spotifyUserId);
+    }
 }

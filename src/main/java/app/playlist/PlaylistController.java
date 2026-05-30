@@ -43,6 +43,13 @@ public class PlaylistController {
         return service.get(Long.parseLong(id));
     }
 
+    @DeleteMapping("/user-data")
+    public ResponseEntity<Void> deleteUserData(@RequestHeader("Authorization") String authHeader) {
+        String userId = spotifyClient.getUserId(authHeader);
+        service.deleteByUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/playlists")
     public List<Playlist> getAllPlaylists(@RequestHeader("Authorization") String authHeader) {
         String userId = spotifyClient.getUserId(authHeader);

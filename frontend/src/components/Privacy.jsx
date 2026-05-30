@@ -64,10 +64,12 @@ export default function Privacy() {
         </section>
 
         <section>
-          <h3>Data retention</h3>
+          <h3>Data retention and deletion</h3>
           <p>
             Generated playlist records (Spotify user ID, playlist title, Spotify link) are stored
-            until you request deletion. No other data is retained on our servers.
+            for the duration of your session. <strong>All data is automatically and permanently
+            deleted from our servers when you log out</strong> using the logout button in the app.
+            No manual deletion request is needed.
           </p>
         </section>
 

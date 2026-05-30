@@ -13,6 +13,14 @@ export async function generatePlaylist(prompt, size, accessToken, criteria = {})
   return response.json();
 }
 
+export async function deleteUserData(accessToken) {
+  const response = await fetch(`${BASE_URL}/user-data`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${accessToken}` },
+  });
+  if (!response.ok) throw new Error('Failed to delete user data');
+}
+
 export async function getSavedPlaylists(accessToken) {
   const response = await fetch(`${BASE_URL}/playlists`, {
     headers: { 'Authorization': `Bearer ${accessToken}` },

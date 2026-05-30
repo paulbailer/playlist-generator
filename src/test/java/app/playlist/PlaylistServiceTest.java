@@ -74,6 +74,12 @@ class PlaylistServiceTest {
     }
 
     @Test
+    void deleteByUser_delegatesToRepository() {
+        service.deleteByUser("user123");
+        verify(repo).deleteBySpotifyUserId("user123");
+    }
+
+    @Test
     void getAll_returnsEmptyList_whenRepositoryIsEmpty() {
         when(repo.findAll()).thenReturn(List.of());
 

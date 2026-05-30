@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { generatePlaylist, getSavedPlaylists } from '../services/api';
+import { generatePlaylist, getSavedPlaylists, deleteUserData } from '../services/api';
 import PlaylistCard from './PlaylistCard';
 import SegmentedSelector from './SegmentedSelector';
 import ChipSelector from './ChipSelector';
@@ -55,6 +55,15 @@ export default function Generator({ accessToken, onLogout }) {
     getSavedPlaylists(accessToken).then(setHistory).catch(() => {});
   }, []);
 
+  async function handleLogout() {
+    try {
+      await deleteUserData(accessToken);
+    } catch {
+      // proceed with logout even if the server call fails
+    }
+    onLogout();
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setGenerating(true);
@@ -80,7 +89,7 @@ export default function Generator({ accessToken, onLogout }) {
     <div className="app">
       <header>
         <h1>Playlist Generator</h1>
-        <button className="btn-ghost" onClick={onLogout}>Log out</button>
+        <button className="btn-ghost" onClick={handleLogout}>Log out</button>
       </header>
 
       <main>

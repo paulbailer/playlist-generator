@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.verify;
 
 @WebMvcTest(PlaylistController.class)
 class PlaylistControllerTest {
@@ -24,6 +25,16 @@ class PlaylistControllerTest {
     @MockitoBean PlaylistService service;
     @MockitoBean PlaylistGeneratorService generatorService;
     @MockitoBean SpotifyClient spotifyClient;
+
+    @Test
+    void deleteUserData_returns204AndDeletesData() throws Exception {
+        when(spotifyClient.getUserId("Bearer token")).thenReturn("user123");
+
+        mockMvc.perform(delete("/user-data").header("Authorization", "Bearer token"))
+            .andExpect(status().isNoContent());
+
+        verify(service).deleteByUser("user123");
+    }
 
     @Test
     void getAllPlaylists_returns200WithList() throws Exception {
