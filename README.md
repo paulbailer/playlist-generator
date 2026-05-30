@@ -38,6 +38,8 @@ This gives far more expressive input than the old numeric seed parameters, and t
 
 ## Features
 
+- **No login required** — anyone can generate a track list with individual Spotify links
+- **Connect Spotify** to upgrade: playlists are created directly on your account
 - Natural language prompt — describe any vibe, mood, or theme
 - **Popularity** control — Underground → Deep cuts → Mixed → Popular → Mainstream
 - **Energy** control — Very chill → Chill → Medium → Energetic → Intense
@@ -46,6 +48,8 @@ This gives far more expressive input than the old numeric seed parameters, and t
 - Configurable track count (1–50)
 - Max 2 songs per artist enforced server-side
 - Playlist history scoped per Spotify user
+- All user data deleted from the database on logout
+- Friendly error shown if a Spotify account isn't authorised for the app
 
 ## Project Structure
 
@@ -55,11 +59,12 @@ frontend/                        ← React app (GitHub Pages)
     auth/spotify.js              ← PKCE OAuth helpers
     services/api.js              ← backend API calls
     components/
-      Login.jsx
-      Generator.jsx
+      Generator.jsx              ← main UI, handles guest + authenticated modes
+      TrackList.jsx              ← track list for guest results
       PlaylistCard.jsx
       SegmentedSelector.jsx
       ChipSelector.jsx
+      Privacy.jsx
 
 src/main/java/app/               ← Spring Boot backend (Render)
   Application.java
@@ -72,10 +77,12 @@ src/main/java/app/               ← Spring Boot backend (Render)
     PlaylistController.java      ← REST endpoints
     PlaylistGeneratorService.java
     ClaudeClient.java            ← Claude API
-    SpotifyClient.java           ← Spotify API
+    SpotifyClient.java           ← Spotify API (user + Client Credentials)
     GeneratePlaylistRequest.java
     PlaylistSuggestion.java
+    SuggestionResponse.java
     TrackSuggestion.java
+    TrackResult.java
 ```
 
 ## Running Locally
@@ -88,6 +95,8 @@ src/main/java/app/               ← Spring Boot backend (Render)
 export SPRING_PROFILES_ACTIVE=local
 export ANTHROPIC_API_KEY=sk-ant-...
 export ANTHROPIC_MODEL=claude-sonnet-4-6   # optional, this is the default
+export SPOTIFY_CLIENT_ID=...               # needed for the guest /suggest endpoint
+export SPOTIFY_CLIENT_SECRET=...
 
 ./gradlew bootRun
 ```
@@ -113,25 +122,45 @@ Open `http://127.0.0.1:3000` (not `localhost` — must match the redirect URI ex
 
 ## API
 
+**Guest — no authentication required**
 ```
-POST /generate-playlist
-Authorization: Bearer <spotify_access_token>
+POST /suggest
 Content-Type: application/json
 
 {
   "prompt": "upbeat 90s rock for a road trip",
   "size": 20,
-  "popularity": "deep_cuts",   // underground | deep_cuts | mixed | popular | mainstream
-  "energy": "energetic",       // very_chill | chill | medium | energetic | very_energetic
-  "era": ["90s", "2000s"],     // optional, any if omitted
-  "mood": ["Happy"]            // optional, any if omitted
+  "popularity": "deep_cuts",
+  "energy": "energetic",
+  "era": ["90s"],
+  "mood": ["Happy"]
 }
+```
+Returns `{ "title": "...", "tracks": [{ "track": "...", "artist": "...", "spotifyUrl": "..." }] }`
+
+**Authenticated — creates playlist on Spotify**
+```
+POST /generate-playlist
+Authorization: Bearer <spotify_access_token>
+Content-Type: application/json
+
+{ "prompt": "...", "size": 20, "popularity": "mixed", "energy": "chill", "era": [], "mood": [] }
 ```
 
 ```
 GET /playlists
 Authorization: Bearer <spotify_access_token>
 ```
+
+```
+DELETE /user-data
+Authorization: Bearer <spotify_access_token>
+```
+
+Criteria values:
+- `popularity`: `underground` | `deep_cuts` | `mixed` | `popular` | `mainstream`
+- `energy`: `very_chill` | `chill` | `medium` | `energetic` | `very_energetic`
+- `era` / `mood`: optional arrays, omit or leave empty for no filter
 
 ## Deployment
 
@@ -150,6 +179,8 @@ The repo includes a `Dockerfile`. On Render:
 | `SPRING_DATASOURCE_PASSWORD` | from Render PostgreSQL |
 | `ANTHROPIC_API_KEY` | your Anthropic key |
 | `ANTHROPIC_MODEL` | `claude-sonnet-4-6` |
+| `SPOTIFY_CLIENT_ID` | your Spotify app client ID |
+| `SPOTIFY_CLIENT_SECRET` | your Spotify app client secret |
 
 **Frontend (GitHub Pages)**
 
@@ -163,3 +194,7 @@ Add these repository secrets (Settings → Secrets → Actions):
 The workflow in `.github/workflows/deploy.yml` builds and deploys automatically on every push to `main` that touches `frontend/`. It can also be triggered manually from the Actions tab.
 
 Add `https://paulbailer.github.io/playlist-generator` as a redirect URI in your Spotify Developer App.
+
+## Note on Spotify Access
+
+Due to Spotify's development mode restrictions (as of May 2025, extended quota is only available to companies), full playlist creation is limited to accounts manually added in the Spotify Developer Dashboard. The app handles this gracefully — anyone can use the guest mode to generate track lists, and unauthorized users who attempt to connect their Spotify account see a clear message explaining how to request access.
