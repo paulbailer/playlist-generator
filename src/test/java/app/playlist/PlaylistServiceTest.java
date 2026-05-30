@@ -63,6 +63,17 @@ class PlaylistServiceTest {
     }
 
     @Test
+    void getByUser_returnsOnlyThatUsersPlaylists() {
+        Playlist p = playlistWith("Rock Mix", "link");
+        when(repo.findBySpotifyUserId("user123")).thenReturn(List.of(p));
+
+        List<Playlist> result = service.getByUser("user123");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Rock Mix");
+    }
+
+    @Test
     void getAll_returnsEmptyList_whenRepositoryIsEmpty() {
         when(repo.findAll()).thenReturn(List.of());
 

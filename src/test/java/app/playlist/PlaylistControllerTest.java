@@ -23,15 +23,17 @@ class PlaylistControllerTest {
 
     @MockitoBean PlaylistService service;
     @MockitoBean PlaylistGeneratorService generatorService;
+    @MockitoBean SpotifyClient spotifyClient;
 
     @Test
     void getAllPlaylists_returns200WithList() throws Exception {
-        when(service.getAll()).thenReturn(List.of(
+        when(spotifyClient.getUserId("Bearer test-token")).thenReturn("user123");
+        when(service.getByUser("user123")).thenReturn(List.of(
             playlistWith("Rock Mix", "https://open.spotify.com/playlist/1"),
             playlistWith("Chill Vibes", "https://open.spotify.com/playlist/2")
         ));
 
-        mockMvc.perform(get("/playlists"))
+        mockMvc.perform(get("/playlists").header("Authorization", "Bearer test-token"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(2))
             .andExpect(jsonPath("$[0].name").value("Rock Mix"))

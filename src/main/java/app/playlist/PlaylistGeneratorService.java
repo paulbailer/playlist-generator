@@ -41,6 +41,7 @@ public class PlaylistGeneratorService {
         }
 
         Playlist playlist = new Playlist();
+        playlist.setSpotifyUserId(userId);
         playlist.setName(title);
         playlist.setLink("https://open.spotify.com/playlist/" + playlistId);
         return playlistService.save(playlist);

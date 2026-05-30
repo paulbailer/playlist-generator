@@ -20,6 +20,9 @@ public class PlaylistController {
     @Autowired
     PlaylistGeneratorService generatorService;
 
+    @Autowired
+    SpotifyClient spotifyClient;
+
     Logger logger = LoggerFactory.getLogger(PlaylistController.class);
 
     @PostMapping("/generate-playlist")
@@ -41,8 +44,9 @@ public class PlaylistController {
     }
 
     @GetMapping("/playlists")
-    public List<Playlist> getAllPlaylists() {
-        return service.getAll();
+    public List<Playlist> getAllPlaylists(@RequestHeader("Authorization") String authHeader) {
+        String userId = spotifyClient.getUserId(authHeader);
+        return service.getByUser(userId);
     }
 
     @GetMapping("/user")

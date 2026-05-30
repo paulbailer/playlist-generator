@@ -52,7 +52,7 @@ export default function Generator({ accessToken, onLogout }) {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    getSavedPlaylists().then(setHistory).catch(() => {});
+    getSavedPlaylists(accessToken).then(setHistory).catch(() => {});
   }, []);
 
   async function handleSubmit(e) {

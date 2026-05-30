@@ -13,8 +13,10 @@ export async function generatePlaylist(prompt, size, accessToken, criteria = {})
   return response.json();
 }
 
-export async function getSavedPlaylists() {
-  const response = await fetch(`${BASE_URL}/playlists`);
+export async function getSavedPlaylists(accessToken) {
+  const response = await fetch(`${BASE_URL}/playlists`, {
+    headers: { 'Authorization': `Bearer ${accessToken}` },
+  });
   if (!response.ok) throw new Error('Failed to load playlists');
   return response.json();
 }

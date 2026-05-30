@@ -59,6 +59,5 @@ export function getAccessToken() {
 }
 
 export function clearTokens() {
-  sessionStorage.removeItem('access_token');
-  sessionStorage.removeItem('code_verifier');
+  sessionStorage.clear();
 }

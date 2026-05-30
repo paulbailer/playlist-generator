@@ -25,4 +25,8 @@ public class PlaylistService {
         repo.findAll().forEach(playlists::add);
         return playlists;
     }
+
+    public List<Playlist> getByUser(String spotifyUserId) {
+        return repo.findBySpotifyUserId(spotifyUserId);
+    }
 }
