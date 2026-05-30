@@ -1,0 +1,167 @@
+:root {
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --green: #1db954;
+  --green-hover: #1ed760;
+  --text: #fff;
+  --text-muted: #b3b3b3;
+  --border: #333;
+  --radius: 8px;
+  --max-width: 680px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* ── Login ─────────────────────────────────────────── */
+.login {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.login-card {
+  background: var(--surface);
+  border-radius: 16px;
+  max-width: 400px;
+  padding: 48px;
+  text-align: center;
+  width: 90%;
+}
+
+.login-card h1 { font-size: 1.8rem; margin-bottom: 12px; }
+.login-card p  { color: var(--text-muted); margin-bottom: 32px; }
+
+/* ── App shell ──────────────────────────────────────── */
+.app    { margin: 0 auto; max-width: var(--max-width); padding: 32px 16px; }
+.center { align-items: center; display: flex; height: 100vh; justify-content: center; }
+
+header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+header h1 { font-size: 1.5rem; }
+
+/* ── Generator form ─────────────────────────────────── */
+.generator-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 14px;
+  resize: vertical;
+  width: 100%;
+}
+
+textarea:focus { border-color: var(--green); outline: none; }
+
+.form-row { align-items: flex-end; display: flex; gap: 12px; }
+
+label {
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  gap: 6px;
+}
+
+input[type='number'] {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 1rem;
+  padding: 10px 14px;
+  width: 80px;
+}
+
+input[type='number']:focus { border-color: var(--green); outline: none; }
+
+/* ── Buttons ────────────────────────────────────────── */
+.btn-primary {
+  background: var(--green);
+  border: none;
+  border-radius: 24px;
+  color: #000;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 12px 28px;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary:hover:not(:disabled) { background: var(--green-hover); }
+.btn-primary:disabled              { cursor: not-allowed; opacity: 0.5; }
+
+.btn-ghost {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+.btn-outline {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  color: var(--text);
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.btn-outline:hover { border-color: var(--green); color: var(--green); }
+
+/* ── Result ─────────────────────────────────────────── */
+.result        { margin-bottom: 40px; }
+.result-label  { color: var(--green); font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── Playlist card ──────────────────────────────────── */
+.playlist-card {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 16px;
+}
+
+.playlist-card.highlight { border-color: var(--green); }
+.playlist-name { font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── History ────────────────────────────────────────── */
+.section-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 12px; text-transform: uppercase; }
+
+/* ── Error ──────────────────────────────────────────── */
+.error { color: #f15e6c; margin-bottom: 16px; }

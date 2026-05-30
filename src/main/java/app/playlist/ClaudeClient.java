@@ -54,7 +54,10 @@ public class ClaudeClient {
 
         try {
             JsonNode root = objectMapper.readTree(response);
-            String text = root.path("content").get(0).path("text").asText();
+            String text = root.path("content").get(0).path("text").asText().strip();
+            if (text.startsWith("```")) {
+                text = text.replaceAll("(?s)^```[a-zA-Z]*\\n?", "").replaceAll("```\\s*$", "").strip();
+            }
             return objectMapper.readValue(text,
                 objectMapper.getTypeFactory().constructCollectionType(List.class, TrackSuggestion.class));
         } catch (Exception e) {
