@@ -1,3 +1,8 @@
 package app.playlist;
 
-public record TrackSuggestion(String track, String artist) {}
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record TrackSuggestion(
+    @JsonProperty("track") String track,
+    @JsonProperty("artist") String artist
+) {}
