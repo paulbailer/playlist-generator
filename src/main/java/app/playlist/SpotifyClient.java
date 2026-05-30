@@ -88,9 +88,20 @@ public class SpotifyClient {
     // ── Shared search logic ─────────────────────────────────────────────────
 
     private Optional<TrackResult> searchWithToken(TrackSuggestion suggestion, String authHeader) {
+        // Primary: field-qualified search
+        Optional<TrackResult> result = querySpotify(
+            "track:" + suggestion.track() + " artist:" + suggestion.artist(), authHeader);
+        if (result.isPresent()) return result;
+
+        // Fallback: plain text search — more lenient, catches slight title/artist variations
+        logger.debug("Falling back to plain search for: {} by {}", suggestion.track(), suggestion.artist());
+        return querySpotify(suggestion.track() + " " + suggestion.artist(), authHeader);
+    }
+
+    private Optional<TrackResult> querySpotify(String q, String authHeader) {
         try {
             URI uri = UriComponentsBuilder.fromUriString("https://api.spotify.com/v1/search")
-                .queryParam("q", "track:" + suggestion.track() + " artist:" + suggestion.artist())
+                .queryParam("q", q)
                 .queryParam("type", "track")
                 .queryParam("limit", "1")
                 .build()
@@ -106,15 +117,14 @@ public class SpotifyClient {
             JsonNode items = objectMapper.readTree(response).path("tracks").path("items");
             if (items.isArray() && !items.isEmpty()) {
                 JsonNode item = items.get(0);
-                String track = item.path("name").asText();
+                String track  = item.path("name").asText();
                 String artist = item.path("artists").get(0).path("name").asText();
-                String spotifyUrl = item.path("external_urls").path("spotify").asText();
-                return Optional.of(new TrackResult(track, artist, spotifyUrl));
+                String url    = item.path("external_urls").path("spotify").asText();
+                return Optional.of(new TrackResult(track, artist, url));
             }
-            logger.warn("No Spotify result for: {} by {}", suggestion.track(), suggestion.artist());
             return Optional.empty();
         } catch (Exception e) {
-            logger.warn("Spotify search failed for: {} by {} — {}", suggestion.track(), suggestion.artist(), e.getMessage());
+            logger.warn("Spotify query failed for '{}' — {}", q, e.getMessage());
             return Optional.empty();
         }
     }

@@ -20,7 +20,7 @@ public class PlaylistGeneratorService {
 
     public SuggestionResponse suggest(GeneratePlaylistRequest request) {
         String criteria = buildCriteria(request);
-        int fetchSize = (int) Math.ceil(request.size() * 1.5);
+        int fetchSize = fetchSize(request);
         PlaylistSuggestion suggestion = claudeClient.getSuggestions(request.prompt(), fetchSize, criteria);
 
         List<TrackResult> tracks = capByArtist(suggestion.tracks(), 2).stream()
@@ -35,7 +35,7 @@ public class PlaylistGeneratorService {
 
     public Playlist generate(GeneratePlaylistRequest request, String authHeader) {
         String criteria = buildCriteria(request);
-        int fetchSize = (int) Math.ceil(request.size() * 1.5);
+        int fetchSize = fetchSize(request);
         PlaylistSuggestion suggestion = claudeClient.getSuggestions(request.prompt(), fetchSize, criteria);
 
         List<TrackSuggestion> filtered = capByArtist(suggestion.tracks(), 2);
@@ -60,6 +60,11 @@ public class PlaylistGeneratorService {
         playlist.setName(title);
         playlist.setLink("https://open.spotify.com/playlist/" + playlistId);
         return playlistService.save(playlist);
+    }
+
+    private int fetchSize(GeneratePlaylistRequest request) {
+        int multiplier = "underground".equals(request.popularity()) ? 3 : 2;
+        return (int) Math.ceil(request.size() * multiplier);
     }
 
     private String buildCriteria(GeneratePlaylistRequest r) {

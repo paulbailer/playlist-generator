@@ -8,14 +8,11 @@ The backend was a Spring Boot REST API acting as a proxy to the Spotify Web API,
 
 ## Revival
 
-Three years later the project has been rebuilt with a modern stack. The main driver was Spotify deprecating their `/v1/recommendations` endpoint in November 2024, which was the core of the original generation logic. Rather than find a workaround within the Spotify API, the approach is now:
+Three years later the project has been rebuilt from the ground up. The main driver was Spotify deprecating their `/v1/recommendations` endpoint in November 2024, which was the core of the original generation logic.
 
-1. **User describes** the playlist they want in plain language — any mood, theme, or context
-2. **Claude (Anthropic's LLM)** generates a list of specific track and artist suggestions that fit the description
-3. **Spotify Search** resolves each suggestion to a real Spotify track URI
-4. **Spotify API** creates the playlist on the user's account and populates it
+Rather than find a workaround within the Spotify API, the replacement is an AI-powered approach using Anthropic's Claude model. The user describes what kind of playlist they want in plain language — a mood, a setting, a decade, an energy level — and Claude generates a curated list of specific tracks and artists that fit. Each suggestion is then verified against Spotify's catalog using the search API, so only songs that actually exist on the platform make it into the final playlist. The result is either a shareable track list with links to every major streaming platform, or — for users who connect their Spotify account — a playlist created directly on their profile.
 
-This gives far more expressive input than the old numeric seed parameters, and the quality of suggestions improves alongside the underlying model.
+This gives far more expressive input than the old numeric seed parameters (BPM floats, danceability scores), and the quality of suggestions naturally improves as the underlying model gets better.
 
 ## Live
 
@@ -27,8 +24,8 @@ This gives far more expressive input than the old numeric seed parameters, and t
 **Backend**
 - Java 17 / Spring Boot 3.5
 - PostgreSQL (production) / H2 in-memory (local dev)
-- Anthropic Claude API — playlist and title generation
-- Spotify Web API — track search, playlist creation
+- Anthropic Claude API — track selection and playlist title generation
+- Spotify Web API — catalog search and playlist creation
 - Deployed on Render via Docker
 
 **Frontend**
@@ -38,8 +35,8 @@ This gives far more expressive input than the old numeric seed parameters, and t
 
 ## Features
 
-- **No login required** — anyone can generate a track list with individual Spotify links
-- **Connect Spotify** to upgrade: playlists are created directly on your account
+- **No login required** — anyone can generate a track list with links to Spotify, Apple Music, Tidal, and more via [song.link](https://song.link)
+- **Connect Spotify** to upgrade: playlists are created directly on your Spotify account
 - Natural language prompt — describe any vibe, mood, or theme
 - **Popularity** control — Underground → Deep cuts → Mixed → Popular → Mainstream
 - **Energy** control — Very chill → Chill → Medium → Energetic → Intense
@@ -60,7 +57,7 @@ frontend/                        ← React app (GitHub Pages)
     services/api.js              ← backend API calls
     components/
       Generator.jsx              ← main UI, handles guest + authenticated modes
-      TrackList.jsx              ← track list for guest results
+      TrackList.jsx              ← track list with multi-platform links
       PlaylistCard.jsx
       SegmentedSelector.jsx
       ChipSelector.jsx
@@ -197,4 +194,4 @@ Add `https://paulbailer.github.io/playlist-generator` as a redirect URI in your 
 
 ## Note on Spotify Access
 
-Due to Spotify's development mode restrictions (as of May 2025, extended quota is only available to companies), full playlist creation is limited to accounts manually added in the Spotify Developer Dashboard. The app handles this gracefully — anyone can use the guest mode to generate track lists, and unauthorized users who attempt to connect their Spotify account see a clear message explaining how to request access.
+Due to Spotify's development mode restrictions (as of May 2025, extended quota is only available to companies), full playlist creation is limited to accounts manually added in the Spotify Developer Dashboard. The app handles this gracefully — anyone can use the guest mode to generate track lists with multi-platform links, and unauthorized users who attempt to connect their Spotify account see a clear message explaining how to request access.

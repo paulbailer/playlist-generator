@@ -2,17 +2,27 @@ export default function TrackList({ tracks, onConnect }) {
   return (
     <div>
       <div className="track-list">
-        {tracks.map((t, i) => (
-          <div key={i} className="track-row">
-            <div className="track-info">
-              <span className="track-name">{t.track}</span>
-              <span className="track-artist">{t.artist}</span>
+        {tracks.map((t, i) => {
+          const trackId = t.spotifyUrl.split('/').pop().split('?')[0];
+          const songLinkUrl = `https://song.link/s/${trackId}`;
+
+          return (
+            <div key={i} className="track-row">
+              <div className="track-info">
+                <span className="track-name">{t.track}</span>
+                <span className="track-artist">{t.artist}</span>
+              </div>
+              <div className="track-actions">
+                <a href={t.spotifyUrl} target="_blank" rel="noopener noreferrer" className="btn-outline">
+                  Spotify
+                </a>
+                <a href={songLinkUrl} target="_blank" rel="noopener noreferrer" className="btn-outline">
+                  All platforms
+                </a>
+              </div>
             </div>
-            <a href={t.spotifyUrl} target="_blank" rel="noopener noreferrer" className="btn-outline">
-              Open
-            </a>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {onConnect && (
