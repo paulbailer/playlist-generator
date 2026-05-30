@@ -1,12 +1,14 @@
 package app.playlist;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public record GeneratePlaylistRequest(
-    String prompt,
-    int size,
-    String popularity,
-    String energy,
-    List<String> era,
-    List<String> mood
+    @JsonProperty("prompt")     String prompt,
+    @JsonProperty("size")       int size,
+    @JsonProperty("popularity") String popularity,
+    @JsonProperty("energy")     String energy,
+    @JsonProperty("era")        List<String> era,
+    @JsonProperty("mood")       List<String> mood
 ) {}
